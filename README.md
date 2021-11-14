@@ -10,11 +10,11 @@ Features:
 
 - input and output of Standard MIDI Files
 - data structures, classes, etc. for representing music data in memory
-    o sequence structure consisting of multiple tracks
-    o track structure consisting of multiple events
-    o events contain note and control data
-    o extensible attribute-value property lists
-    o tempo track and time signature representation
+    - sequence structure consisting of multiple tracks
+    - track structure consisting of multiple events
+    - events contain note and control data
+    - extensible attribute-value property lists
+    - tempo track and time signature representation
 - input and output of a text-based representation: Allegro files
 - extensive editing operations on sequences and tracks
 - conversion to/from binary buffers for archiving, undo/redo, etc.
