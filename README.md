@@ -1,6 +1,5 @@
-portsmf README.txt
-14 Jun 2008
-Roger B. Dannenberg
+# portsmf README.md
+- Roger B. Dannenberg, 14 Jun 2008
 
 Portsmf is "Port Standard MIDI File", a cross-platform, C++ library
 for reading and writing Standard MIDI Files.
