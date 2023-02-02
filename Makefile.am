@@ -43,4 +43,4 @@ AUX_DIST = $(ac_aux_dir)/config.guess \
 
 # Documentation files that should be both distributed and installed in the doc
 # directory,
-dist_doc_DATA = README.txt license.txt
+dist_doc_DATA = README.md license.txt
