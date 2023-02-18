@@ -15,6 +15,7 @@
 #include "string.h"
 #include "assert.h"
 
+
 #define MIDIFILE_ERROR -1
 
 /* public stuff */
@@ -35,7 +36,7 @@ void Midifile_reader::midifile()
     while (ntrks-- > 0 && !midifile_error) readtrack();
 }
 
-int Midifile_reader::readmt(char *s, int skip)
+int Midifile_reader::readmt(const char *s, int skip)
     /* read through the "MThd" or "MTrk" header string */
     /* if skip == 1, we attempt to skip initial garbage. */
 {
@@ -44,7 +45,7 @@ int Midifile_reader::readmt(char *s, int skip)
     char b[4];
     char buff[32];
     int c;
-    char *errmsg = "expecting ";
+    const char *errmsg = "expecting ";
 
     retry:
     while ( nread<4 ) {
@@ -379,9 +380,9 @@ long Midifile_reader::readvarinum()
     return (value);
 }
 
-long Midifile_reader::to32bit(int c1, int c2, int c3, int c4)
+int32 Midifile_reader::to32bit(int c1, int c2, int c3, int c4)
 {
-    long value = 0L;
+    int32 value = 0L;
 
     value = (c1 & 0xff);
     value = (value<<8) + (c2 & 0xff);
@@ -414,7 +415,7 @@ int Midifile_reader::read16bit()
     return to16bit(c1,c2);
 }
 
-void Midifile_reader::mferror(char *s)
+void Midifile_reader::mferror(const char *s)
 {
     Mf_error(s);
     midifile_error = 1;

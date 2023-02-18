@@ -77,7 +77,7 @@ void String_parse::get_remainder(std::string &field)
 {
     field.clear();
     skip_space();
-    int len = str->length() - pos;
+    int len = (int) str->length() - pos;
     if ((len > 0) && ((*str)[len - 1] == '\n')) { // if str ends in newline, 
         len--; // reduce length to ignore newline
     }

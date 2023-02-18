@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     }
 
     if (!midifile && !allegrofile) {
-        int len = strlen(filename);
+        int len = (int) strlen(filename);
         if (len < 4) print_help();    // no extension, need -m or -a
         char *ext = filename + len - 4;
         if (strcmp(ext, ".mid") == 0) midifile = true;

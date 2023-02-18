@@ -32,9 +32,9 @@ public:
     int track_number; // the number of the (current) track
     // chan is actual_channel + channel_offset_per_track * track_num +
     //                          channel_offset_per_track * port 
-    long channel_offset_per_track; // used to encode track number into channel
+    int channel_offset_per_track; // used to encode track number into channel
         // default is 0, set this to 0 to merge all tracks to 16 channels
-    long channel_offset_per_port; // used to encode port number into channel
+    int channel_offset_per_port; // used to encode port number into channel
         // default is 16, set to 0 to ignore port prefix meta events
     // while reading, this is channel_offset_per_track * track_num
     int channel_offset;
@@ -57,7 +57,7 @@ public:
 
     void set_nomerge(bool flag) { Mf_nomerge = flag; }
     void set_skipinit(bool flag) { Mf_skipinit = flag; }
-    long get_currtime() { return Mf_currtime; }
+    int64 get_currtime() { return Mf_currtime; }
 
 protected:
     int meta_channel; // the channel for meta events, set by MIDI chan prefix
@@ -74,7 +74,7 @@ protected:
     void Mf_chanprefix(int chan);
     void Mf_portprefix(int port);
     void Mf_eot();
-    void Mf_error(char *);
+    void Mf_error(const char *);
     void Mf_header(int,int,int);
     void Mf_on(int,int,int);
     void Mf_off(int,int,int);
@@ -169,7 +169,7 @@ void Alg_midifile_reader::Mf_eot()
 }
 
 
-void Alg_midifile_reader::Mf_error(char *msg)
+void Alg_midifile_reader::Mf_error(const char *msg)
 {
     fprintf(stdout, "Midifile reader error: %s\n", msg);
 }
@@ -353,7 +353,7 @@ void Alg_midifile_reader::Mf_seqnum(int n)
 }
 
 
-static char *fpsstr[4] = {"24", "25", "29.97", "30"};
+static const char *fpsstr[4] = {"24", "25", "29.97", "30"};
 
 void Alg_midifile_reader::Mf_smpte(int hours, int mins, int secs,
                                    int frames, int subframes)

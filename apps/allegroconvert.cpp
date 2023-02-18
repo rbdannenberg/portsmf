@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     // Do not use both -t and -f:
     if (tempo_flag & flatten_flag) print_help();
 
-    int len = strlen(filename);
+    int len = (int) strlen(filename);
     if (!midifile && !allegrofile) {
         if (len < 4) print_help();    // no extension, need -m or -a
         ext = filename + len - 4;
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     for (i = 0; i < seq->track_list.length(); i++) {
         events += seq->track_list[i].length();
     }
-    printf("%ld tracks, %d events\n", seq->track_list.length(), events);
+    printf("%d tracks, %d events\n", seq->track_list.length(), events);
     printf("wrote %s\n", outfilename);
     
     /* DELETE THE DATA */

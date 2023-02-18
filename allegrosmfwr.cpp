@@ -19,9 +19,9 @@ public:
   char type;//'n' for note, 'o' for off, 's' for time signature,
             // 'c' for tempo changes
   double time;
-  long index; //of the event in mSeq->notes
+  int index; //of the event in mSeq->notes
   class event_queue *next;
-  event_queue(char t, double when, long x, class event_queue *n) {
+  event_queue(char t, double when, int x, class event_queue *n) {
         type = t; time = when; index = x; next = n; }
 };
 
@@ -30,17 +30,17 @@ class Alg_smf_write {
 public:
     Alg_smf_write(Alg_seq_ptr seq);
     ~Alg_smf_write();
-    long channels_per_track; // used to encode track number into chan field
+    int channels_per_track; // used to encode track number into chan field
     // chan is actual_channel + channels_per_track * track_number
     // default is 100, set this to 0 to merge all tracks to 16 channels
 
     void write(ostream &file /* , midiFileFormat = 1 */);
 
 private:
-    long previous_divs; // time in ticks of most recently written event
+    int64 previous_divs; // time in ticks of most recently written event
 
     void write_track(int i);
-    void write_tempo(int divs, int tempo);
+    void write_tempo(int64 divs, int tempo);
     void write_tempo_change(int i);
     void write_time_signature(int i);
     void write_note(Alg_note_ptr note, bool on);
@@ -160,7 +160,8 @@ void Alg_smf_write::write_note(Alg_note_ptr note, bool on)
     double event_time = (on ? note->time : note->time + note->dur);
     write_delta(event_time);
 
-    //printf("deltaDivisions: %d, beats elapsed: %g, on? %c\n", deltaDivisions, note->time, on);
+    //printf("deltaDivisions: %d, beats elapsed: %g, on? %c\n",
+    //       deltaDivisions, note->time, on);
 
     char chan = char(note->chan & 15);
     int pitch = int(note->pitch + 0.5);
@@ -263,7 +264,7 @@ static char hex_to_char(const char *s)
 
 void Alg_smf_write::write_binary(int type_byte, const char *msg)
 {
-    int len = strlen(msg) / 2;
+    int len = (int) (strlen(msg) / 2);
     out_file->put(type_byte);
     write_varinum(len);
     for (int i = 0; i < len; i++) {
@@ -291,7 +292,7 @@ void Alg_smf_write::write_update(Alg_update_ptr update)
     } else if (!strcmp(name, "programi")) {
         write_delta(update->time);
         out_file->put(0xC0 + to_midi_channel(update->chan));
-        write_data(update->parameter.i);
+        write_data((int) update->parameter.i);
     } else if (!strcmp(name, "bendr")) {
         int temp = ROUND(0x2000 * (update->parameter.r + 1));
         if (temp > 0x3fff) temp = 0x3fff; // 14 bits maximum
@@ -350,7 +351,7 @@ void Alg_smf_write::write_update(Alg_update_ptr update)
         // the following simple parser does not reject all badly
         // formatted strings, but it should parse good strings ok
         const char *s = update->parameter.s;
-        int len = strlen(s);
+        int len = (int) strlen(s);
         char smpteoffset[5];
         if (len < 24) return; // not long enough, must be bad format
         int fps;
@@ -380,7 +381,7 @@ void Alg_smf_write::write_update(Alg_update_ptr update)
     // the other event, we'll just record it in the Alg_smf_write object.
     // After both events are seen, we write the data. (See below.)
     } else if (!strcmp(name, "keysigi")) {
-        keysig = update->parameter.i;
+        keysig = (int) update->parameter.i;
         keysig_when = update->time;
     } else if (!strcmp(name, "modea")) {
         if (!strcmp(alg_attr_name(update->parameter.a), "major"))
@@ -477,10 +478,10 @@ void Alg_smf_write::write_track(int i)
 }
 
 
-void Alg_smf_write::write_tempo(int divs, int tempo)
+void Alg_smf_write::write_tempo(int64 divs, int tempo)
 {
     //    printf("Inserting tempo %f after %f clocks.\n", tempo, delta);
-    write_varinum(divs - previous_divs);
+    write_varinum((int) (divs - previous_divs));
     previous_divs = divs;
     out_file->put('\xFF');
     out_file->put('\x51');
@@ -495,12 +496,12 @@ void Alg_smf_write::write_tempo_change(int i)
     // extract tempo map
     Alg_beats &b = seq->get_time_map()->beats;
     double tempo;
-    long divs;
+    int64 divs;
     if (i < seq->get_time_map()->beats.len - 1) {
         tempo = 1000000 * ((b[i+1].time - b[i].time) / 
                            (b[i+1].beat - b[i].beat));
-        divs = ROUND(b[i].beat * division);
-        write_tempo(divs, ROUND(tempo));
+        divs = (int) ROUND(b[i].beat * division);
+        write_tempo(divs, (int) ROUND(tempo));
     } else if (seq->get_time_map()->last_tempo_flag) { // write the final tempo
         divs = ROUND(division * b[i].beat);
         tempo = (1000000.0 / seq->get_time_map()->last_tempo);
@@ -533,9 +534,9 @@ void Alg_smf_write::write_time_signature(int i)
 
 void Alg_smf_write::write(ostream &file)
 {
-    int track_len_offset;
-    int track_end_offset;
-    int track_len;
+    int64 track_len_offset;
+    int64 track_end_offset;
+    int64 track_len;
 
     out_file = &file;
 
@@ -571,7 +572,7 @@ void Alg_smf_write::write(ostream &file)
         track_end_offset = out_file->tellp();
         track_len = track_end_offset - track_len_offset - 4;
         out_file->seekp(track_len_offset);
-        write_32bit(track_len);
+        write_32bit((int) track_len);
         out_file->seekp(track_end_offset);
     }
 }
@@ -602,9 +603,9 @@ void Alg_smf_write::write_32bit(int num)
 void Alg_smf_write::write_delta(double event_time)
 {
     // divisions is ideal absolute time in divisions
-    long divisions = ROUND(division * event_time);
-    long delta_divs = divisions - previous_divs;
-    write_varinum(delta_divs);
+    int64 divisions = ROUND(division * event_time);
+    int64 delta_divs = divisions - previous_divs;
+    write_varinum((int) delta_divs);
     previous_divs = divisions;    
 }
 

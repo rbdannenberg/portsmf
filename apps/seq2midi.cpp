@@ -42,13 +42,13 @@ void wait_until(double time)
 
 void midi_note_on(PortMidiStream *midi, double when, int chan, int key, int loud)
 {
-    unsigned long timestamp = (unsigned long) (when * 1000);
+    PmTimestamp timestamp = (PmTimestamp) (when * 1000);
     chan = chan & 15;
     if (key > 127) key = 127;
     if (key < 0) key = 0;
     if (loud > 127) loud = 127;
     if (loud < 0) loud = 0;
-    unsigned long data = Pm_Message(0x90 + chan, key, loud);
+    PmMessage data = Pm_Message(0x90 + chan, key, loud);
     Pm_WriteShort(midi, timestamp, data);
 }
 
@@ -56,11 +56,11 @@ void midi_note_on(PortMidiStream *midi, double when, int chan, int key, int loud
 static void midi_channel_message_2(PortMidiStream *midi, double when, 
                                    int status, int chan, int data)
 {
-    unsigned long timestamp = (unsigned long) (when * 1000);
+    PmTimestamp timestamp = (PmTimestamp) (when * 1000);
     chan = chan & 15;
     if (data > 127) data = 127;
     if (data < 0) data = 0;
-    unsigned long msg = Pm_Message(status + chan, data, 0);
+    PmMessage msg = Pm_Message(status + chan, data, 0);
     Pm_WriteShort(midi, timestamp, msg);
 }
 
@@ -68,13 +68,13 @@ static void midi_channel_message_2(PortMidiStream *midi, double when,
 static void midi_channel_message(PortMidiStream *midi, double when, 
                                  int status, int chan, int data, int data2)
 {
-    unsigned long timestamp = (unsigned long) (when * 1000);
+    PmTimestamp timestamp = (PmTimestamp) (when * 1000);
     chan = chan & 15;
     if (data > 127) data = 127;
     if (data < 0) data = 0;
     if (data2 > 127) data2 = 127;
     if (data2 < 0) data2 = 0;
-    unsigned long msg = Pm_Message(status + chan, data, data2);
+    PmMessage msg = Pm_Message(status + chan, data, data2);
     Pm_WriteShort(midi, timestamp, msg);
 }
 
@@ -103,7 +103,7 @@ void send_midi_update(Alg_update_ptr u, PortMidiStream *midi)
                              bend >> 7, bend & 0x7F);
     } else if (u->get_attribute() == program_attr) {
         midi_channel_message_2(midi, u->time, MIDI_CH_PROGRAM, 
-                               u->chan, u->get_integer_value());
+                               u->chan, (int) u->get_int64_value());
     } else if (strncmp("control", u->get_attribute(), 7) == 0 &&
                u->get_update_type() == 'r') {
         int control = atoi(u->get_attribute() + 7);

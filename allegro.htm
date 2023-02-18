@@ -297,20 +297,34 @@ the
 semantics of attributes. This section describes the syntax to denote an
 attribute. Additional syntax and semantics for tempo and beats is given
 in the next section.
+<p>Comments are indicated by the "#" character that is not part of a
+quoted string.  The "#" and everything that follows to the end of the line
+are ignored.
 <p>Allegro notes and updates are denoted by a line of text containing a
-set of attributes. In addition, if a line begins with the characterrs
+set of attributes. If a line begins with the character
 "#",
-the line is not interpreted as a note or update. If the line begins
-with
-"# " (hash, space) the line is a comment. The characters "#track"
-denote
-the beginning of&nbsp; a new track. The "new track" syntax is:
+the line is <i>not</i> interpreted as a note or update but merely a
+full line comment, with two special exceptions:
+<ol>
+  <li>A line beginning with "#track" denotes
+the beginning of a new track. The "new track" syntax is:
 <br>
 &nbsp;&nbsp;&nbsp; #track <i>track_number</i> "<i>track_name</i>"
+<br> 
+where <i>track_number</i> is a decimal integer and <i>track_name</i> 
+is any string of characters.</li>
+<li>A line beginning with "#offset" denotes a score offset. The
+"offset" syntax is:
 <br>
-where <i>track_number</i> is a decimal integer and <i>track_name</i>
-is any string of characters. Other metacommands beginning with "#" may
-be introduced in the future.
+&nbsp;&nbsp;&nbsp; #offset <i>number</i>
+<br>
+where <i>number</i> is a float. The offset is stored in the sequence
+data structure, but has no specific interpretation.
+</li>
+</ol>
+Other metacommands beginning with "#" may
+be introduced in the future, so it is strongly recommended that
+comments beginning in column 1 follow the "#" with a space.
 </p>
 <p>All strings are quoted with double (") quotes. To enclose quotes and
 other special characters in strings, use backslash ("\") as the escape
