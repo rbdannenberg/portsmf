@@ -112,7 +112,7 @@ Alg_parameters_ptr Alg_reader::process_attributes(
         Alg_parameters_ptr attributes, double time)
 {
     // print "process_attributes:", attributes
-    bool ts_flag = false;
+//    bool ts_flag = false;
     if (attributes) {
         Alg_parameters_ptr a;
         bool in_seconds = seq->get_units_are_seconds();
@@ -124,18 +124,18 @@ Alg_parameters_ptr Alg_reader::process_attributes(
             double beat = a->parm.r;
             seq->insert_beat(time, beat);
         }
-        if ((a = Alg_parameters::remove_key(&attributes, "timesig_numr"))) {
-            tsnum = a->parm.r;
-            ts_flag = true;
-        }
-        if ((a = Alg_parameters::remove_key(&attributes, "timesig_denr"))) {
-            tsden = a->parm.r;
-            ts_flag = true;
-        }
-        if (ts_flag) {
-            seq->set_time_sig(seq->get_time_map()->time_to_beat(time),
-            tsnum, tsden);
-        }
+//        if ((a = Alg_parameters::remove_key(&attributes, "timesig_numr"))) {
+//            tsnum = a->parm.r;
+//            ts_flag = true;
+//        }
+//        if ((a = Alg_parameters::remove_key(&attributes, "timesig_denr"))) {
+//            tsden = a->parm.r;
+//            ts_flag = true;
+//        }
+//        if (ts_flag) {
+//            seq->set_time_sig(seq->get_time_map()->time_to_beat(time),
+//            tsnum, tsden);
+//        }
         if (in_seconds) seq->convert_to_seconds();
     }
     return attributes; // in case it was modified
@@ -151,6 +151,11 @@ bool Alg_reader::parse()
     double dur = 1.0;
     double time = 0.0;
     int track_num = 0;
+    Alg_attribute timesig_num_attr = symbol_table.insert_string("timesig_numr");
+    Alg_attribute timesig_den_attr = symbol_table.insert_string("timesig_denr");
+    double timesig_time = -9999;
+    double timesig_num = 0;
+    double timesig_den = 0;
     seq->convert_to_seconds();
     //seq->set_real_dur(0.0); // just in case it's not initialized already
     readline();
@@ -391,19 +396,50 @@ bool Alg_reader::parse()
                         seq->add_event(new_upd, track_num);
                         if (seq->get_real_dur() < time) seq->set_real_dur(time);
                     }
-                    if (attributes) {
-                        while (attributes) {
+                    while (attributes) {
+                        Alg_parameters_ptr p = attributes;
+                        attributes = attributes->next;
+                        // If we get timesig_numr and timesig_denr at the
+                        // same time, we combine them into a time signature.
+                        // If only one is found, it is ignored.
+                        Alg_attribute attr = p->parm.attr;
+                        if (attr == timesig_num_attr) {
+                            if (timesig_time == -9999) {
+                                timesig_time = time;
+                            } else if (timesig_time != time) {
+                                timesig_time = time;
+                                timesig_den = 0;
+                            }
+                            timesig_num = p->parm.r;
+                        } else if (attr == timesig_den_attr) {
+                            if (timesig_time == -9999) {
+                                timesig_time = time;
+                            } else if (timesig_time != time) {
+                                timesig_time = time;
+                                timesig_num = 0;
+                            }
+                            timesig_den = p->parm.r;
+                        }
+                        if (attr == timesig_num_attr ||
+                            attr == timesig_den_attr) {
+                            if (timesig_num > 0 and timesig_den > 0) {
+                                seq->set_time_sig(
+                                    seq->get_time_map()->time_to_beat(time),
+                                    timesig_num, timesig_den);
+                                timesig_num = 0;
+                                timesig_den = 0;
+                                timesig_time = -9999;
+                            }
+                        } else {
                             Alg_update_ptr new_upd = new Alg_update;
                             new_upd->chan = voice;
                             new_upd->time = time;
                             new_upd->set_identifier(update_key);
-                            new_upd->parameter = attributes->parm;
+                            new_upd->parameter = p->parm;
                             seq->add_event(new_upd, track_num);
-                            Alg_parameters_ptr p = attributes;
-                            attributes = attributes->next;
                             p->parm.s = NULL; // so we don't delete the string
-                            delete p;
                         }
+                        delete p;
                     }
                 }
                 if (next_flag) {

@@ -8,7 +8,7 @@ includedir=@abs_srcdir@
 # The headers are always in the source dir
 
 Name: portSMF
-Description: Portmedia Simple Midi File library
+Description: Portmedia Standard Midi File library
 Requires: 
 Version: 0.1
 

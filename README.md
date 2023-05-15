@@ -19,15 +19,16 @@ Features:
 - extensive editing operations on sequences and tracks
 - conversion to/from binary buffers for archiving, undo/redo, etc.
 
-Portsmf is a relatively small number of about 9 files, so there is
-currently no support for building/maintaining Portsmf as a separate
-library. (Contributions are welcome.) For now, it is suggested that
-you simply compile these files along with your application sources.
+Portsmf is a relatively small number of about 9 files, so I recommend
+simply compiling the files along with your application sources.
+Dan Church contributed updates to Audacities old autoconf-based
+build system, so you should also be able to build a makefile for
+dynamic or static libraries with `autoreconf -fi` and `configure`.
 
 There is a test program in portsmf_test and CMakeLists.txt files
 to build it as an example.
 
-You might want to browse through portsmf_test/allegro_test.cpp 
+You might want to browse through `portsmf_test/allegro_test.cpp`
 for examples that use and exercise most of the portsmf functions.
 
 Portsmf was created for "note tracks" in Audacity. This version is

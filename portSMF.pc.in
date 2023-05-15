@@ -2,7 +2,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: portSMF
-Description: Portmedia Simple Midi File library
+Description: Portmedia Standard Midi File library
 Requires: 
 Version: 0.1
 
