@@ -585,7 +585,9 @@ public:
 #ifndef NDEBUG
         const char *fence = buffer + len;
         assert(ptr < fence);
-        while (*ptr++) { assert(ptr < fence); }
+        while (*ptr++) {
+            assert(ptr < fence);
+        }
 #endif
         get_pad();
         return s;
