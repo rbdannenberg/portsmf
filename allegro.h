@@ -696,8 +696,8 @@ public:
     virtual ~Alg_track() { // note: do not call set_time_map(NULL)!
         if (time_map) {
             time_map->dereference();
+            time_map = NULL;
         }
-        time_map = NULL;
     }
 
     // Returns a buffer containing a serialization of the
