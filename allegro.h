@@ -582,10 +582,11 @@ public:
                           return d; }
     const char *get_string() {
         char *s = ptr;
-        char *fence = buffer + len;
+#ifndef NDEBUG
+        const char *fence = buffer + len;
         assert(ptr < fence);
         while (*ptr++) { assert(ptr < fence); }
-        (void)fence;
+#endif
         get_pad();
         return s;
     }
@@ -613,11 +614,14 @@ typedef class Serial_write_buffer: public Serial_buffer {
     }
     bool check_buffer(int needed);
     void set_string(const char *s) { 
-        char *fence = buffer + len;
+#ifndef NDEBUG
+        const char *fence = buffer + len;
         assert(ptr < fence);
         // two brackets surpress a g++ warning, because this is an
         // assignment operator inside a test.
-        while ((*ptr++ = *s++)) { assert(ptr < fence); }
+        while ((*ptr++ = *s++)) {
+            assert(ptr < fence);
+        }
         // 4311 is type cast pointer to long warning
         // 4312 is type cast long to pointer warning
 #if defined(_WIN32)
@@ -627,7 +631,7 @@ typedef class Serial_write_buffer: public Serial_buffer {
 #if defined(_WIN32)
 #pragma warning(default: 4311 4312)
 #endif
-        (void)fence;
+#endif
         pad();
     }
     void set_int32(int v) { *((int32 *) ptr) = (int32) v; ptr += 4; }
@@ -688,7 +692,9 @@ public:
     Alg_track(Alg_event_list_ref event_list, Alg_time_map_ptr map, 
               bool units_are_seconds);
     virtual ~Alg_track() { // note: do not call set_time_map(NULL)!
-        if (time_map) { time_map->dereference(); }
+        if (time_map) {
+            time_map->dereference();
+        }
         time_map = NULL;
     }
 
