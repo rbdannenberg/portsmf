@@ -580,11 +580,14 @@ public:
     double get_double() { assert(!(((intptr_t) ptr) & 7));
                           double d = *((double *) ptr); ptr += sizeof(double); 
                           return d; }
-    const char *get_string() { char *s = ptr; char *fence = buffer + len;
-                         assert(ptr < fence);
-                         while (*ptr++) assert(ptr < fence);
-                         get_pad();
-                         return s; }
+    const char *get_string() {
+        char *s = ptr;
+        [[maybe_unused]] char *fence = buffer + len;
+        assert(ptr < fence);
+        while (*ptr++) { assert(ptr < fence); }
+        get_pad();
+        return s;
+    }
     void check_input_buffer(int needed) {
         assert(get_posn() + needed <= len); }
 } *Serial_read_buffer_ptr;
@@ -609,7 +612,7 @@ typedef class Serial_write_buffer: public Serial_buffer {
     }
     bool check_buffer(int needed);
     void set_string(const char *s) { 
-        char *fence = buffer + len;
+        [[maybe_unused]] char *fence = buffer + len;
         assert(ptr < fence);
         // two brackets surpress a g++ warning, because this is an
         // assignment operator inside a test.
@@ -682,7 +685,9 @@ public:
     Alg_track(Alg_event_list_ref event_list, Alg_time_map_ptr map, 
               bool units_are_seconds);
     virtual ~Alg_track() { // note: do not call set_time_map(NULL)!
-        if (time_map) time_map->dereference(); time_map = NULL; }
+        if (time_map) { time_map->dereference(); }
+        time_map = NULL;
+    }
 
     // Returns a buffer containing a serialization of the
     // file.  It will be an ASCII representation unless text is true.
