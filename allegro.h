@@ -582,9 +582,10 @@ public:
                           return d; }
     const char *get_string() {
         char *s = ptr;
-        [[maybe_unused]] char *fence = buffer + len;
+        char *fence = buffer + len;
         assert(ptr < fence);
         while (*ptr++) { assert(ptr < fence); }
+        (void)fence;
         get_pad();
         return s;
     }
@@ -612,11 +613,11 @@ typedef class Serial_write_buffer: public Serial_buffer {
     }
     bool check_buffer(int needed);
     void set_string(const char *s) { 
-        [[maybe_unused]] char *fence = buffer + len;
+        char *fence = buffer + len;
         assert(ptr < fence);
         // two brackets surpress a g++ warning, because this is an
         // assignment operator inside a test.
-        while ((*ptr++ = *s++)) assert(ptr < fence);
+        while ((*ptr++ = *s++)) { assert(ptr < fence); }
         // 4311 is type cast pointer to long warning
         // 4312 is type cast long to pointer warning
 #if defined(_WIN32)
@@ -626,7 +627,9 @@ typedef class Serial_write_buffer: public Serial_buffer {
 #if defined(_WIN32)
 #pragma warning(default: 4311 4312)
 #endif
-        pad(); }
+        (void)fence;
+        pad();
+    }
     void set_int32(int v) { *((int32 *) ptr) = (int32) v; ptr += 4; }
     void set_int64(int64 v) { assert(!(((intptr_t) ptr) & 7));
                               *((int64 *) ptr) = (int64) v; ptr += 8; }
