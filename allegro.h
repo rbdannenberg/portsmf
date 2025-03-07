@@ -588,6 +588,8 @@ public:
         while (*ptr++) {
             assert(ptr < fence);
         }
+#else
+        while (*ptr++) {}
 #endif
         get_pad();
         return s;
@@ -633,6 +635,8 @@ typedef class Serial_write_buffer: public Serial_buffer {
 #if defined(_WIN32)
 #pragma warning(default: 4311 4312)
 #endif
+#else
+        while ((*ptr++ = *s++)) {}
 #endif
         pad();
     }
