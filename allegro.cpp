@@ -3451,7 +3451,7 @@ void Alg_seq::beat_to_measure(double beat, int *measure, double *m_beat,
             prev_den = time_sig[tsx].den;
         } else {
             m = m + (beat - prev_beat) / bpm;
-            *measure = m;
+            *measure = (int)(m);
             *m_beat = (m - *measure) * bpm;
             *num = prev_num;
             *den = prev_den;
@@ -3466,7 +3466,7 @@ void Alg_seq::beat_to_measure(double beat, int *measure, double *m_beat,
     }
     bpm = prev.num * 4 / prev.den;
     m = m + (beat - prev.beat) / bpm;
-    *measure = m;
+    *measure = (int)(m);
     *m_beat = (m - *measure) * bpm;
     *num = prev.num;
     *den = prev.den;

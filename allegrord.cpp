@@ -631,7 +631,7 @@ double Alg_reader::parse_loud(string &field)
 {
     const char *msg = "Loudness expected";
     if (isdigit(field[1])) {
-        return parse_int(field);
+        return (double)(parse_int(field));
     } else {
         string dyn = field.substr(1);
         transform(dyn.begin(), dyn.end(), dyn.begin(), ::toupper);
